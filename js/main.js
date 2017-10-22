@@ -7,7 +7,7 @@
     }
 
     var qrcode = new QRCode("qr-code");
-    var scanner = new Instascan.Scanner({video: document.getElementById('preview')});
+    var scanner = new Instascan.Scanner({video: document.getElementById('preview'), backgroundScan: false});
 
     scanner.addListener('scan', function (content) {
         getContentElement().value = content;
@@ -15,7 +15,11 @@
     });
 
     Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
+        // favor rear camera
+        if (cameras.length > 1) {
+            scanner.start(cameras[1]);
+        // fallback to front cam
+        } else if (cameras.length > 0) {
             scanner.start(cameras[0]);
         } else {
             console.error('No cameras found.');
@@ -25,13 +29,10 @@
     });
 
 
-    // Add 'Enter Key' handler for input field
+    // Add keyUp handler for input field
     function inputKeyUp(e) {
-        e.which = e.which || e.keyCode;
-        if(e.which == 13) {
             var content = getContentElement().value;
             qrcode.makeCode(content);
-        }
     }
     getContentElement().onkeyup = inputKeyUp;
 
